@@ -26,12 +26,53 @@ class _ArtDetailWidgetState extends State<ArtDetailWidget> {
           ),
         ],
       ),
+<<<<<<< HEAD
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
               widget.data.title,
+=======
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(25.0),
+            ),
+            child: Container(
+              width: 450,
+              height: 250,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  fit: BoxFit.fill,
+                  image: NetworkImage(widget.data.imgUrl),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 15.0,
+          ),
+          ListTile(
+            leading: CircleAvatar(
+              backgroundColor: Colors.pink,
+              radius: 25.0,
+            ),
+            title: Text(
+              'John Appleseed',
+            ),
+            trailing: IconButton(
+              icon: Icon(Icons.bookmark),
+              color: asoPrimary,
+              onPressed: () {},
+            ),
+          ),
+          ListTile(
+            leading: Text(
+              widget.data.zone,
+>>>>>>> 315e50e... fixed width and removed extra libraries
               style: TextStyle(
                   fontSize: 36.0, color: Theme.of(context).primaryColor),
             ),
