@@ -9,8 +9,8 @@ class Activity {
   Map<String, double> location;
   List<Profile> profiles;
 
-  Activity(this.title, this.desc, this.zone, {this.imgUrl, this.time,
-      this.location, this.profiles});
+  Activity(this.title, this.desc, this.zone,
+      {this.imgUrl, this.time, this.location, this.profiles});
 }
 
 class ActivityQueries {
@@ -41,7 +41,7 @@ class ActivityQueries {
   String getOneByID(String id) {
     return """
     {
-      activity(where: {id: $id}) {
+      activity(where: {id: "$id"}) {
         title
         desc
         overview
@@ -65,5 +65,32 @@ class ActivityQueries {
       }
     }
   """;
+  }
+
+  String getAllByTitleAndDesc(String title, String desc) {
+    return """
+    {
+      activities(where: {OR: [{title_contains: "$title"}, {desc_contains: "$desc"}]}) {
+        title
+        desc
+        zone
+        image {
+          url
+        }
+        startTime
+        endTime
+        location {
+          latitude
+          longitude
+        }
+        profile {
+          name
+          desc
+          social
+          type
+        }
+      }
+  	}
+    """;
   }
 }

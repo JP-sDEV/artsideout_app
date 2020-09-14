@@ -47,7 +47,7 @@ class InstallationQueries {
   String getOneByID(String id) {
     return """
     {
-      Installation(where: {id: $id}) {
+      installation(where: {id: "$id"}) {
         title
         desc
         zone
@@ -68,5 +68,32 @@ class InstallationQueries {
       }
     }
   """;
+  }
+
+  String getAllByTitleAndDesc(String title, String desc) {
+    return """
+    {
+      installations(where: {OR: [{title_contains: "$title"}, {desc_contains: "$desc"}]}) {
+        title
+        desc
+        zone
+        videoUrl
+        image {
+          url
+        }
+        location {
+          latitude
+          longitude
+        }
+        locationRoom
+        profile {
+          name
+          desc
+          social
+          type
+        }
+      }
+    }
+    """;
   }
 }

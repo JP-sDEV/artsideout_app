@@ -7,7 +7,7 @@ import 'package:artsideout_app/graphql/config.dart';
 import 'package:artsideout_app/graphql/Installation.dart';
 // Common
 import 'package:artsideout_app/components/PageHeader.dart';
-import 'package:artsideout_app/components/card.dart';
+import 'package:artsideout_app/components/art/ArtCard.dart';
 import 'package:artsideout_app/components/common.dart';
 // Art
 import 'package:artsideout_app/components/art/ArtDetailWidget.dart';

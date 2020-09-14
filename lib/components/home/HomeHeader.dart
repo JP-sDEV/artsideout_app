@@ -27,21 +27,9 @@ class _HeaderState extends State<Header> {
     return ClipPath(
       clipper: MyClipper(),
       child: Container(
-        //padding: EdgeInsets.only(left: 20, top: 60, right: 20),
+        padding: EdgeInsets.only(top: 20),
         height: 20,
         width: double.infinity,
-//        decoration: widget.isLargeScreen
-//            ? null
-//            : BoxDecoration(
-//                gradient: LinearGradient(
-//                  begin: Alignment.topRight,
-//                  end: Alignment.bottomLeft,
-//                  colors: [
-//                    Color(0xFFE5549B),
-//                    Color(0xfff30075),
-//                  ],
-//                ),
-//              ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[

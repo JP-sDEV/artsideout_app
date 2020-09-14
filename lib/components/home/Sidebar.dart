@@ -57,7 +57,7 @@ class _SidebarState extends State<Sidebar> {
               icon: Icon(Icons.search),
               iconSize: 40.0,
               onPressed: () {
-                changeScreen(0);
+                changeScreen(7);
               },
             ),
           ),
@@ -95,6 +95,7 @@ class _SidebarState extends State<Sidebar> {
       ),
     );
   }
+
   changeScreen(int index) {
     setState(() {
       widget.onTabTapped(index);

@@ -102,8 +102,11 @@ class _ArtDetailWidgetState extends State<ArtDetailWidget> {
                       title: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'John Appleseed',
+                          FittedBox(
+                            fit: BoxFit.fitWidth,
+                            child: Text(
+                              'John Appleseed',
+                            ),
                           ),
                           SizedBox(
                             height: 4,

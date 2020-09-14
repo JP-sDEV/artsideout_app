@@ -1,4 +1,5 @@
 import 'package:artsideout_app/components/home/SpeedDialMenu.dart';
+import 'package:artsideout_app/pages/search/MasterSearchPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 // Pages
@@ -23,7 +24,7 @@ class _LayoutState extends State<Layout> {
     NavigationItem(
         Icon(Icons.home, color: Colors.black), Text("Home"), HomePage()),
     NavigationItem(Icon(Icons.search, color: Colors.black), Text("Search"),
-        PlaceholderWidget(Colors.green)),
+        MasterSearchPage()),
     NavigationItem(
         Icon(Icons.palette, color: Colors.black), Text("Art"), MasterArtPage()),
     NavigationItem(Icon(Icons.event, color: Colors.black), Text("Activities"),

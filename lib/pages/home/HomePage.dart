@@ -1,4 +1,5 @@
 import 'package:artsideout_app/components/activity/ActivityDetailWidget.dart';
+import 'package:artsideout_app/pages/search/MasterSearchPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -19,6 +20,7 @@ import 'package:artsideout_app/pages/activity/MasterActivityPage.dart';
 import 'package:artsideout_app/components/home/Sidebar.dart';
 
 const int HOMEPAGE_INDEX = 10;
+
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
@@ -52,7 +54,9 @@ class _HomePageState extends State<HomePage> {
     HomeAction("Activities", Colors.yellow[200], "assets/icons/activities.svg",
         300, MasterActivityPage()),
     HomeAction("Saved", Colors.orange[200], "assets/icons/saved.svg", 200,
-        MasterArtPage())
+        MasterArtPage()),
+    HomeAction("Search", Colors.orange[200], "assets/icons/saved.svg", 200,
+        MasterSearchPage())
   ];
 
   @override
@@ -122,7 +126,7 @@ class _HomePageState extends State<HomePage> {
                           left: 0,
                           bottom: 0,
                           child: StaggeredGridView.countBuilder(
-                            // padding: EdgeInsets.zero,
+                            //padding: EdgeInsets.zero,
                             crossAxisCount: 2,
                             itemCount: listHomeActions.length,
                             itemBuilder: (BuildContext context, int index) =>
@@ -134,13 +138,13 @@ class _HomePageState extends State<HomePage> {
                                           setState(() {
                                             onTabTapped(index);
                                           });
-                                         Navigator.push(context,
-                                             CupertinoPageRoute(
-                                           builder: (context) {
-                                             return listHomeActions[index]
-                                                 .page;
-                                           },
-                                         ));
+                                          Navigator.push(context,
+                                              CupertinoPageRoute(
+                                            builder: (context) {
+                                              return listHomeActions[index]
+                                                  .page;
+                                            },
+                                          ));
                                         },
                                         child: ClipRRect(
                                             borderRadius:
