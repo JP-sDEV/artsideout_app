@@ -41,9 +41,16 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
   Widget selectedItem;
   String queryResult = "";
   Map<String, bool> optionsMap = {
-    "Installations": true,
-    "Activities": true,
-    "Profiles": true
+    "Music": true,
+    "Spoken Word": true,
+    "Theatre": true,
+    "Sculpture": true,
+    "Digital Media": true,
+    "Mix Media": true,
+    "Drawings/Paintings": true,
+    "Artists": true,
+    "Organizers": true,
+    "Sponsors": true,
   };
 
   TextEditingController _searchQueryController = TextEditingController();
@@ -51,6 +58,7 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
   List<Installation> listInstallations = List<Installation>();
   List<Activity> listActivities = List<Activity>();
   List<Profile> listProfiles = List<Profile>();
+  List<dynamic> listResults = List<dynamic>();
 
   FetchResults fetchResults = new FetchResults();
 
@@ -58,7 +66,7 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
     String inputText = _searchQueryController.text;
 
     if (inputText != ' ' && inputText != '') {
-      clearResults();
+      if (listResults != null) clearResults();
 
       setState(() {
         isLoading = true;
@@ -71,6 +79,8 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
       if (optionsMap["Profiles"])
         listProfiles = await fetchResults.getProfiles(inputText);
 
+      listResults = [...listInstallations, ...listActivities, ...listProfiles];
+
       queryResult = inputText;
       checkNoResults();
     }
@@ -80,14 +90,13 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
     listInstallations.clear();
     listActivities.clear();
     listProfiles.clear();
+    listResults.clear();
   }
 
   void checkNoResults() {
     setState(() {
       isLoading = false;
-      if (listInstallations.isEmpty &&
-          listActivities.isEmpty &&
-          listProfiles.isEmpty) {
+      if (listResults.isEmpty) {
         noResults = true;
         selectedItem = null;
       } else {
@@ -103,9 +112,9 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
 
   Widget getCard(String type, int index) {
     switch (type) {
-      case "Installations:":
+      case "Installation":
         {
-          var item = listInstallations[index];
+          var item = listResults[index];
           return GestureDetector(
             child: ArtListCard(
               title: item.title,
@@ -134,9 +143,9 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
           );
         }
         break;
-      case "Activities:":
+      case "Activity":
         {
-          var item = listActivities[index];
+          var item = listResults[index];
           return GestureDetector(
             child: ActivityCard(
               title: item.title,
@@ -168,9 +177,9 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
           );
         }
         break;
-      case "Profiles:":
+      case "Profile":
         {
-          var item = listProfiles[index];
+          var item = listResults[index];
           return GestureDetector(
             child: ProfileCard(
               name: item.name,
@@ -364,7 +373,7 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
                           height: 20,
                         ),
                         Positioned(
-                          top: 115,
+                          top: 90,
                           bottom: 0,
                           left: 0,
                           right: 0,
@@ -372,26 +381,12 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                if (optionsMap["Installations"])
+                                if (listResults.length != 0)
                                   ResultsBox(
-                                      numResults: listInstallations.length,
-                                      cardAspectRatio: 1,
-                                      numColumns: numCards,
-                                      heading: "Installations:",
-                                      getCard: getCard),
-                                if (optionsMap["Activities"])
-                                  ResultsBox(
-                                      numResults: listActivities.length,
-                                      cardAspectRatio: 3,
-                                      numColumns: numActivityCards,
-                                      heading: "Activities:",
-                                      getCard: getCard),
-                                if (optionsMap["Profiles"])
-                                  ResultsBox(
-                                      numResults: listProfiles.length,
-                                      cardAspectRatio: 0.95,
-                                      numColumns: numCards,
-                                      heading: "Profiles:",
+                                      results: listResults,
+                                      columnCount: isLargeScreen
+                                          ? 7
+                                          : isMediumScreen ? 5 : 2,
                                       getCard: getCard),
                                 SizedBox(
                                   height: 50,

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 
 class FilterDropdown extends StatefulWidget {
+  /// Callback to update calling page's map of options to state
   final Function onFilterChange;
+
+  /// Map each option (String) to its state (enable = true and disabled = false)
   final Map<String, bool> optionsMap;
+
   FilterDropdown({this.onFilterChange, this.optionsMap});
 
   _FilterDropdownState createState() => _FilterDropdownState();
@@ -39,7 +43,6 @@ class _FilterDropdownState extends State<FilterDropdown> {
         hint: Text('Filter:'),
         onChanged: (test) {},
         items: widget.optionsMap.entries.map((e) {
-          print(e.key);
           return DropdownMenuItem(
             child: Container(
               child: Row(
