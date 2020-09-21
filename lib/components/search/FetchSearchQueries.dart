@@ -15,11 +15,12 @@ class FetchResults {
   List<Activity> listActivities = List<Activity>();
   List<Profile> listProfiles = List<Profile>();
 
-  Future<List<Installation>> getInstallations(String term) async {
+  Future<List<Installation>> getInstallationsByTypes(
+      String term, Map<String, bool> types) async {
     InstallationQueries queryInstallation = InstallationQueries();
     QueryResult installationsResult = await _client.query(
       QueryOptions(
-        documentNode: gql(queryInstallation.getAllByTitleAndDesc(term, term)),
+        documentNode: gql(queryInstallation.getAllByTitleAndDesc(term)),
       ),
     );
 
@@ -27,50 +28,57 @@ class FetchResults {
       for (var i = 0;
           i < installationsResult.data["installations"].length;
           i++) {
-        // setState(() {
-        listInstallations.add(
-          Installation(
-            installationsResult.data["installations"][i]["title"],
-            installationsResult.data["installations"][i]["desc"],
-            zone: installationsResult.data["installations"][i]["zone"],
-            imgURL: installationsResult.data["installations"][i]["image"] ==
-                    null
-                ? 'https://via.placeholder.com/350'
-                : installationsResult.data["installations"][i]["image"]["url"],
-            videoURL:
-                installationsResult.data["installations"][i]["videoUrl"] == null
-                    ? 'empty'
-                    : installationsResult.data["installations"][i]["videoUrl"],
-            location: {
-              'latitude': installationsResult.data["installations"][i]
-                          ["location"] ==
+        String installationType =
+            installationsResult.data["installations"][i]["mediumType"];
+        if (types[installationType] == true ||
+            (installationType == null && types["Other"] == true)) {
+          listInstallations.add(
+            Installation(
+              installationsResult.data["installations"][i]["title"],
+              installationsResult.data["installations"][i]["desc"],
+              zone: installationsResult.data["installations"][i]["zone"],
+              imgURL:
+                  installationsResult.data["installations"][i]["image"] == null
+                      ? 'https://via.placeholder.com/350'
+                      : installationsResult.data["installations"][i]["image"]
+                          ["url"],
+              videoURL: installationsResult.data["installations"][i]
+                          ["videoUrl"] ==
                       null
-                  ? 0.0
-                  : installationsResult.data["installations"][i]["location"]
-                      ["latitude"],
-              'longitude': installationsResult.data["installations"][i]
-                          ["location"] ==
-                      null
-                  ? 0.0
-                  : installationsResult.data["installations"][i]["location"]
-                      ["longitude"],
-            },
-            locationRoom: installationsResult.data["installations"][i]
-                ["locationroom"],
-            profiles: [],
-          ),
-        );
+                  ? 'empty'
+                  : installationsResult.data["installations"][i]["videoUrl"],
+              location: {
+                'latitude': installationsResult.data["installations"][i]
+                            ["location"] ==
+                        null
+                    ? 0.0
+                    : installationsResult.data["installations"][i]["location"]
+                        ["latitude"],
+                'longitude': installationsResult.data["installations"][i]
+                            ["location"] ==
+                        null
+                    ? 0.0
+                    : installationsResult.data["installations"][i]["location"]
+                        ["longitude"],
+              },
+              locationRoom: installationsResult.data["installations"][i]
+                  ["locationroom"],
+              profiles: [],
+            ),
+          );
+        }
       }
     }
 
     return listInstallations;
   }
 
-  Future<List<Activity>> getActivities(String term) async {
+  Future<List<Activity>> getActivitiesByTypes(
+      String term, Map<String, bool> types) async {
     ActivityQueries queryActivities = ActivityQueries();
     QueryResult activitiesResult = await _client.query(
       QueryOptions(
-        documentNode: gql(queryActivities.getAllByTitleAndDesc(term, term)),
+        documentNode: gql(queryActivities.getAllByTitleAndDesc(term)),
       ),
     );
 
@@ -120,24 +128,30 @@ class FetchResults {
               activitiesResult.data["activities"][i]["startTime"] ?? "",
           'endTime': activitiesResult.data["activities"][i]["endTime"] ?? ""
         };
-        // setState(() {
-        listActivities.add(
-          Activity(
-              activitiesResult.data["activities"][i]["title"],
-              activitiesResult.data["activities"][i]["desc"],
-              activitiesResult.data["activities"][i]["zone"],
-              imgUrl: imgUrl,
-              time: time,
-              location: location,
-              profiles: profilesList),
-        );
+
+        String performanceType =
+            activitiesResult.data["activities"][i]["performanceType"];
+        if (types[performanceType] == true ||
+            (performanceType == null && types["Other"] == true)) {
+          listActivities.add(
+            Activity(
+                activitiesResult.data["activities"][i]["title"],
+                activitiesResult.data["activities"][i]["desc"],
+                activitiesResult.data["activities"][i]["zone"],
+                imgUrl: imgUrl,
+                time: time,
+                location: location,
+                profiles: profilesList),
+          );
+        }
       }
     }
 
     return listActivities;
   }
 
-  Future<List<Profile>> getProfiles(String term) async {
+  Future<List<Profile>> getProfilesByTypes(
+      String term, Map<String, bool> types) async {
     ProfileQueries queryProfiles = ProfileQueries();
     QueryResult profilesResult = await _client.query(
       QueryOptions(
@@ -152,14 +166,15 @@ class FetchResults {
           socialMap[key] = profilesResult.data["profiles"][i]["social"][key];
         }
 
-        // setState(() {
-        listProfiles.add(Profile(profilesResult.data["profiles"][i]["name"],
-            profilesResult.data["profiles"][i]["desc"],
-            social: socialMap,
-            type: profilesResult.data["profiles"][i]["type"] ?? "",
-            installations: [],
-            activities: []));
-        //  });
+        String profileType = profilesResult.data["profiles"][i]["type"];
+        if (types[profileType] == true ||
+            (profileType == null && types["Other"] == true))
+          listProfiles.add(Profile(profilesResult.data["profiles"][i]["name"],
+              profilesResult.data["profiles"][i]["desc"],
+              social: socialMap,
+              type: profilesResult.data["profiles"][i]["type"] ?? "",
+              installations: [],
+              activities: []));
       }
     }
 

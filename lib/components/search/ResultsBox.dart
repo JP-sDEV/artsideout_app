@@ -21,7 +21,7 @@ class ResultsBox extends StatelessWidget {
         ),
         Center(
           child: Container(
-            width: width < 600 ? width * 0.95 : (width - 100) * 0.90,
+            width: width < 600 ? width * 0.95 : (width - 500) * 0.90,
             height: 600,
             padding: EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
@@ -51,37 +51,40 @@ class ResultsBox extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  width: width < 600 ? width * 0.95 : (width - 100) * 0.90,
+                  width: width < 600 ? width * 0.95 : (width - 500) * 0.9,
                   height: 545,
                   color: Colors.transparent,
                   child: AnimationLimiter(
-                    child: StaggeredGridView.countBuilder(
-                        padding: EdgeInsets.all(0.0),
-                        crossAxisCount: columnCount,
-                        itemCount: results.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          var item = results[index];
-                          return AnimationConfiguration.staggeredGrid(
-                              columnCount: columnCount,
-                              duration: const Duration(milliseconds: 300),
-                              position: index,
-                              child: SlideAnimation(
-                                  verticalOffset: 50,
-                                  child: FadeInAnimation(
-                                    child: Center(
-                                      child: getCard(
-                                          item.runtimeType.toString(), index),
-                                    ),
-                                  )));
-                        },
-                        staggeredTileBuilder: (int index) {
-                          return StaggeredTile.count(
-                            results[index].runtimeType.toString() == "Activity"
-                                ? 2
-                                : 1,
-                            1,
-                          );
-                        }),
+                    child: Center(
+                      child: StaggeredGridView.countBuilder(
+                          padding: EdgeInsets.all(0),
+                          crossAxisCount: columnCount,
+                          itemCount: results.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            var item = results[index];
+                            return AnimationConfiguration.staggeredGrid(
+                                columnCount: columnCount,
+                                duration: const Duration(milliseconds: 300),
+                                position: index,
+                                child: SlideAnimation(
+                                    verticalOffset: 50,
+                                    child: FadeInAnimation(
+                                      child: Center(
+                                        child: getCard(
+                                            item.runtimeType.toString(), index),
+                                      ),
+                                    )));
+                          },
+                          staggeredTileBuilder: (int index) {
+                            return StaggeredTile.count(
+                              results[index].runtimeType.toString() ==
+                                      "Activity"
+                                  ? 2
+                                  : 1,
+                              1,
+                            );
+                          }),
+                    ),
                   ),
                 ),
               ],

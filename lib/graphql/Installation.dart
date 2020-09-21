@@ -70,12 +70,13 @@ class InstallationQueries {
   """;
   }
 
-  String getAllByTitleAndDesc(String title, String desc) {
+  String getAllByTitleAndDesc(String titleDesc) {
     return """
     {
-      installations(where: {OR: [{title_contains: "$title"}, {desc_contains: "$desc"}]}) {
+      installations(where: {OR: [{title_contains: "$titleDesc"}, {desc_contains: "$titleDesc"}]}) {
         title
         desc
+        mediumType
         zone
         videoUrl
         image {

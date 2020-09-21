@@ -40,17 +40,19 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
   bool noResults = false;
   Widget selectedItem;
   String queryResult = "";
+
   Map<String, bool> optionsMap = {
     "Music": true,
     "Spoken Word": true,
     "Theatre": true,
     "Sculpture": true,
-    "Digital Media": true,
+    "DigitalMedia": true,
     "Mix Media": true,
     "Drawings/Paintings": true,
     "Artists": true,
     "Organizers": true,
     "Sponsors": true,
+    "Other": true,
   };
 
   TextEditingController _searchQueryController = TextEditingController();
@@ -62,7 +64,7 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
 
   FetchResults fetchResults = new FetchResults();
 
-  void handleTextChange() async {
+  void handleTextChange() {
     String inputText = _searchQueryController.text;
 
     if (inputText != ' ' && inputText != '') {
@@ -70,20 +72,26 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
 
       setState(() {
         isLoading = true;
+        queryResult = inputText;
       });
 
-      if (optionsMap["Installations"])
-        listInstallations = await fetchResults.getInstallations(inputText);
-      if (optionsMap["Activities"])
-        listActivities = await fetchResults.getActivities(inputText);
-      if (optionsMap["Profiles"])
-        listProfiles = await fetchResults.getProfiles(inputText);
-
-      listResults = [...listInstallations, ...listActivities, ...listProfiles];
-
-      queryResult = inputText;
-      checkNoResults();
+      getResults(inputText);
     }
+  }
+
+  void getResults(String inputText) async {
+    listInstallations =
+        await fetchResults.getInstallationsByTypes(inputText, optionsMap);
+
+    listActivities =
+        await fetchResults.getActivitiesByTypes(inputText, optionsMap);
+
+    listProfiles = await fetchResults.getProfilesByTypes(inputText, optionsMap);
+
+    setState(() {
+      listResults = [...listInstallations, ...listActivities, ...listProfiles];
+      checkNoResults();
+    });
   }
 
   void clearResults() {
@@ -373,20 +381,22 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
                           height: 20,
                         ),
                         Positioned(
-                          top: 90,
+                          top: 80,
                           bottom: 0,
                           left: 0,
                           right: 0,
                           child: SingleChildScrollView(
+                            physics: NeverScrollableScrollPhysics(),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 if (listResults.length != 0)
                                   ResultsBox(
                                       results: listResults,
-                                      columnCount: isLargeScreen
-                                          ? 7
-                                          : isMediumScreen ? 5 : 2,
+                                      columnCount:
+                                          isLargeScreen && selectedItem == null
+                                              ? 5
+                                              : isMediumScreen ? 2 : 2,
                                       getCard: getCard),
                                 SizedBox(
                                   height: 50,
@@ -436,10 +446,11 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
               ),
 
               // If large screen, render installation detail page
-              ((isLargeScreen || isMediumScreen) &&
-                      selectedItem != null &&
-                      noResults != true) //
-                  ? Expanded(flex: 3, key: UniqueKey(), child: selectedItem)
+              ((isLargeScreen || isMediumScreen) && noResults != true) //
+                  ? Expanded(
+                      flex: 3,
+                      key: UniqueKey(),
+                      child: selectedItem ?? Container())
                   : Container(),
             ],
           ),

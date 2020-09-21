@@ -67,13 +67,14 @@ class ActivityQueries {
   """;
   }
 
-  String getAllByTitleAndDesc(String title, String desc) {
+  String getAllByTitleAndDesc(String term) {
     return """
     {
-      activities(where: {OR: [{title_contains: "$title"}, {desc_contains: "$desc"}]}) {
+      activities(where: {OR: [{title_contains: "$term"}, {desc_contains: "$term"}]}) {
         title
         desc
         zone
+        performanceType
         image {
           url
         }
