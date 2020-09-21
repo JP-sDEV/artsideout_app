@@ -47,11 +47,11 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
     "Theatre": true,
     "Sculpture": true,
     "DigitalMedia": true,
-    "Mix Media": true,
-    "Drawings/Paintings": true,
-    "Artists": true,
-    "Organizers": true,
-    "Sponsors": true,
+    "MixMedia": true,
+    "DrawingsAndPaintings": true,
+    "Artist": true,
+    "Organizer": true,
+    "Sponsor": true,
     "Other": true,
   };
 
@@ -72,6 +72,7 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
 
       setState(() {
         isLoading = true;
+        selectedItem = null;
         queryResult = inputText;
       });
 
@@ -393,14 +394,10 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
                                 if (listResults.length != 0)
                                   ResultsBox(
                                       results: listResults,
-                                      columnCount:
-                                          isLargeScreen && selectedItem == null
-                                              ? 5
-                                              : isMediumScreen ? 2 : 2,
+                                      columnCount: isLargeScreen
+                                          ? 5
+                                          : isMediumScreen ? 4 : 2,
                                       getCard: getCard),
-                                SizedBox(
-                                  height: 50,
-                                ),
                               ],
                             ),
                           ),
@@ -446,11 +443,14 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
               ),
 
               // If large screen, render installation detail page
-              ((isLargeScreen || isMediumScreen) && noResults != true) //
+              ((isLargeScreen || isMediumScreen))
                   ? Expanded(
                       flex: 3,
                       key: UniqueKey(),
-                      child: selectedItem ?? Container())
+                      child: selectedItem ??
+                          Container(
+                            color: Colors.transparent,
+                          ))
                   : Container(),
             ],
           ),
