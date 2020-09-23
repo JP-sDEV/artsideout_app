@@ -1,14 +1,13 @@
 // Misc
+import 'package:artsideout_app/components/NoResultBanner.dart';
 import 'package:artsideout_app/components/search/SearchBarFilter.dart';
 import 'package:artsideout_app/pages/art/ArtDetailPage.dart';
-import 'package:artsideout_app/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 // Common
 import 'package:artsideout_app/components/PageHeader.dart';
 import 'package:artsideout_app/components/common.dart';
 // GraphQL
-import 'package:artsideout_app/graphql/Installation.dart';
 // Art
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 import 'package:artsideout_app/components/art/ArtCard.dart';
@@ -17,15 +16,12 @@ import 'package:artsideout_app/components/art/ArtDetailWidget.dart';
 import 'package:artsideout_app/components/activitycard.dart';
 import 'package:artsideout_app/pages/activity/ActivityDetailPage.dart';
 import 'package:artsideout_app/components/activity/ActivityDetailWidget.dart';
-import 'package:artsideout_app/graphql/Activity.dart';
 // Profile
-import 'package:artsideout_app/graphql/Profile.dart';
 import 'package:artsideout_app/components/profile/profileCard.dart';
 import 'package:artsideout_app/pages/profile/ProfileDetailPage.dart';
 // Search
 import 'package:artsideout_app/components/search/FetchSearchQueries.dart';
 import 'package:artsideout_app/components/search/ResultsBox.dart';
-import 'package:artsideout_app/components/search/FilterDropdown.dart';
 
 class MasterSearchPage extends StatefulWidget {
   @override
@@ -37,7 +33,6 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
   int numCards = 2, numActivityCards = 2;
   bool isLargeScreen = false;
   bool isMediumScreen = false;
-  bool isLoading = false;
   bool noResults = false;
   Widget selectedItem;
   String queryResult = "";
@@ -56,23 +51,18 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
     "Other": true,
   };
 
-  TextEditingController _searchQueryController = TextEditingController();
   List<dynamic> listResults = List<dynamic>();
   FetchResults fetchResults = new FetchResults();
 
-  void handleTextChange() async {
-    String inputText = _searchQueryController.text;
-
-    if (inputText != ' ' && inputText != '') {
+  void handleTextChange(String text) async {
+    if (text != ' ' && text != '') {
       setState(() {
-        isLoading = true;
         selectedItem = null;
-        queryResult = inputText;
+        queryResult = text;
       });
 
-      listResults = await fetchResults.getResults(inputText, optionsMap);
+      listResults = await fetchResults.getResults(text, optionsMap);
       setState(() {
-        isLoading = false;
         noResults = listResults.isEmpty;
       });
     }
@@ -188,11 +178,6 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
     }
   }
 
-  void dispose() {
-    _searchQueryController.dispose();
-    super.dispose();
-  }
-
   Widget _buildSearchBar(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 20.0, right: 20.0),
@@ -204,11 +189,8 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
             SizedBox(
               height: 20,
             ),
-            SearchBarFilter(handleTextChange, () {
-              setState(() {
-                _searchQueryController.clear();
-              });
-            }, isLoading, optionsMap, _searchQueryController),
+            SearchBarFilter(
+                handleTextChange: handleTextChange, optionsMap: optionsMap),
             SizedBox(
               height: 20,
             ),
@@ -318,39 +300,7 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
                           ),
                         ),
                         _buildSearchBar(context),
-                        Positioned(
-                          top: 90,
-                          left: 20,
-                          right: 20,
-                          child: AnimatedOpacity(
-                            opacity: noResults ? 1.0 : 0.0,
-                            duration: Duration(milliseconds: 300),
-                            child: Container(
-                              width: double.infinity,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: Color(0xFFF9EBEB),
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.5),
-                                    spreadRadius: 5,
-                                    blurRadius: 7,
-                                    offset: Offset(0, 3),
-                                  ),
-                                ],
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'No results founds for: $queryResult',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 20),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                        NoResultBanner(queryResult, noResults),
                       ]),
                     )),
                   ]),

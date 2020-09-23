@@ -1,5 +1,5 @@
+import 'package:artsideout_app/components/NoResultBanner.dart';
 import 'package:artsideout_app/components/search/SearchBarFilter.dart';
-import 'package:artsideout_app/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -43,7 +43,6 @@ class _MasterArtPageState extends State<MasterArtPage> {
 
   List<Installation> listResults = List<Installation>();
   GraphQLConfiguration graphQLConfiguration = GraphQLConfiguration();
-  TextEditingController searchQueryController = TextEditingController();
   FetchResults fetchResults = new FetchResults();
 
   @override
@@ -52,20 +51,13 @@ class _MasterArtPageState extends State<MasterArtPage> {
     _fillList();
   }
 
-  void handleTextChange() async {
-    String inputText = searchQueryController.text;
-
-    if (inputText != ' ' && inputText != '') {
-      setState(() {
-        isLoading = true;
-      });
-
+  void handleTextChange(String text) async {
+    if (text != ' ' && text != '') {
       listResults =
-          await fetchResults.getInstallationsByTypes(inputText, optionsMap);
+          await fetchResults.getInstallationsByTypes(text, optionsMap);
 
       setState(() {
-        isLoading = false;
-        queryResult = inputText;
+        queryResult = text;
         noResults = fetchResults.checkNoResults(listResults);
       });
     }
@@ -73,7 +65,9 @@ class _MasterArtPageState extends State<MasterArtPage> {
 
   // Installation GraphQL Query
   void _fillList() async {
-    searchQueryController.clear();
+    setState(() {
+      noResults = false;
+    });
 
     InstallationQueries queryInstallation = InstallationQueries();
     GraphQLClient _client = graphQLConfiguration.clientToQuery();
@@ -211,11 +205,10 @@ class _MasterArtPageState extends State<MasterArtPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   SearchBarFilter(
-                                      handleTextChange,
-                                      _fillList,
-                                      isLoading,
-                                      optionsMap,
-                                      searchQueryController),
+                                    handleTextChange: handleTextChange,
+                                    handleTextClear: _fillList,
+                                    optionsMap: optionsMap,
+                                  ),
                                   SizedBox(
                                     height: 20,
                                   ),
@@ -375,6 +368,7 @@ class _MasterArtPageState extends State<MasterArtPage> {
                           ),
                         ],
                       ),
+                      NoResultBanner(queryResult, noResults),
                     ]),
                   )),
                 ]),
@@ -382,11 +376,13 @@ class _MasterArtPageState extends State<MasterArtPage> {
             ),
 
             // If large screen, render installation detail page
-            ((isLargeScreen || isMediumScreen) && listResults.length != 0)
+            ((isLargeScreen || isMediumScreen))
                 ? Expanded(
                     flex: 3,
                     key: UniqueKey(),
-                    child: ArtDetailWidget(data: listResults[selectedValue]))
+                    child: listResults.length != 0
+                        ? ArtDetailWidget(data: listResults[selectedValue])
+                        : Container())
                 : Container(),
           ],
         );

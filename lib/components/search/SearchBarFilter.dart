@@ -3,37 +3,39 @@ import 'package:flutter/material.dart';
 import 'package:artsideout_app/components/search/FilterDropdown.dart';
 
 class SearchBarFilter extends StatefulWidget {
-  final Function handleTextChange;
-  final Function handleTextClear;
-  final bool isLoading;
+  final void Function(String text) handleTextChange;
+  final void Function() handleTextClear;
   final Map<String, bool> optionsMap;
-  final TextEditingController searchQueryController;
 
-  SearchBarFilter(this.handleTextChange, this.handleTextClear, this.isLoading,
-      this.optionsMap, this.searchQueryController);
+  SearchBarFilter(
+      {this.handleTextChange, this.handleTextClear, this.optionsMap});
 
   _SearchBarFilterState createState() => _SearchBarFilterState();
 }
 
 class _SearchBarFilterState extends State<SearchBarFilter> {
+  var isLoading = false;
+  var searchQueryController = new TextEditingController();
+
   Widget build(BuildContext context) {
     return Row(
       children: [
         Expanded(
           flex: 10,
           child: TextField(
-            controller: widget.searchQueryController,
+            controller: searchQueryController,
             autofocus: true,
             decoration: InputDecoration(
               prefixIcon: IconButton(
                 icon: Icon(Icons.search),
                 color: asoPrimary,
-                onPressed: widget.handleTextChange,
+                onPressed: () =>
+                    widget.handleTextChange(searchQueryController.text),
               ),
               suffix: SizedBox(
                 height: 26,
                 width: 26,
-                child: widget.isLoading
+                child: isLoading
                     ? CircularProgressIndicator(
                         valueColor: AlwaysStoppedAnimation(asoPrimary),
                         backgroundColor: Colors.white,
@@ -43,7 +45,11 @@ class _SearchBarFilterState extends State<SearchBarFilter> {
                           Icons.close,
                           size: 26,
                         ),
-                        onTap: widget.handleTextClear,
+                        onTap: () {
+                          if (widget.handleTextClear != null)
+                            widget.handleTextClear();
+                          searchQueryController.clear();
+                        },
                       ),
               ),
               hintText: "Search installations, activities, artists...",
@@ -53,7 +59,11 @@ class _SearchBarFilterState extends State<SearchBarFilter> {
               hintStyle: TextStyle(color: Colors.black),
             ),
             style: TextStyle(color: Colors.black, fontSize: 22.0),
-            onEditingComplete: widget.handleTextChange,
+            onEditingComplete: () async => [
+              isLoading = true,
+              await widget.handleTextChange(searchQueryController.text),
+              isLoading = false
+            ],
           ),
         ),
         SizedBox(
