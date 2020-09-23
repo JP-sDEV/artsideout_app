@@ -15,8 +15,23 @@ class FetchResults {
   List<Activity> listActivities = List<Activity>();
   List<Profile> listProfiles = List<Profile>();
 
+  Future<List<dynamic>> getResults(
+      String input, Map<String, bool> options) async {
+    listInstallations = await getInstallationsByTypes(input, options);
+    listActivities = await getActivitiesByTypes(input, options);
+    listProfiles = await getProfilesByTypes(input, options);
+
+    return [...listInstallations, ...listActivities, ...listProfiles];
+  }
+
+  bool checkNoResults(List<dynamic> listResults) {
+    if (listResults.isEmpty) return true;
+    return false;
+  }
+
   Future<List<Installation>> getInstallationsByTypes(
       String term, Map<String, bool> types) async {
+    listInstallations.clear();
     InstallationQueries queryInstallation = InstallationQueries();
     QueryResult installationsResult = await _client.query(
       QueryOptions(
@@ -28,6 +43,17 @@ class FetchResults {
       for (var i = 0;
           i < installationsResult.data["installations"].length;
           i++) {
+        List<String> imgsURL = [];
+
+        if (installationsResult.data["installations"][i]["images"] != null) {
+          for (int j = 0;
+              j < installationsResult.data["installations"][i]["images"].length;
+              j++) {
+            imgsURL.add(installationsResult.data["installations"][i]["images"]
+                [j]["url"]);
+          }
+        }
+
         String installationType =
             installationsResult.data["installations"][i]["mediumType"];
         if (types[installationType] == true ||
@@ -37,11 +63,7 @@ class FetchResults {
               installationsResult.data["installations"][i]["title"],
               installationsResult.data["installations"][i]["desc"],
               zone: installationsResult.data["installations"][i]["zone"],
-              imgURL:
-                  installationsResult.data["installations"][i]["image"] == null
-                      ? 'https://via.placeholder.com/350'
-                      : installationsResult.data["installations"][i]["image"]
-                          ["url"],
+              imgURL: ['https://via.placeholder.com/350'],
               videoURL: installationsResult.data["installations"][i]
                           ["videoUrl"] ==
                       null
@@ -75,6 +97,7 @@ class FetchResults {
 
   Future<List<Activity>> getActivitiesByTypes(
       String term, Map<String, bool> types) async {
+    listActivities.clear();
     ActivityQueries queryActivities = ActivityQueries();
     QueryResult activitiesResult = await _client.query(
       QueryOptions(
@@ -152,6 +175,7 @@ class FetchResults {
 
   Future<List<Profile>> getProfilesByTypes(
       String term, Map<String, bool> types) async {
+    listProfiles.clear();
     ProfileQueries queryProfiles = ProfileQueries();
     QueryResult profilesResult = await _client.query(
       QueryOptions(

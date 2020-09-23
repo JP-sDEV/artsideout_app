@@ -56,7 +56,6 @@ class _ArtDetailWidgetState extends State<ArtDetailWidget> {
     }
 
     return YoutubePlayerControllerProvider(
-      // Passing controller to widgets below.
       controller: controller,
       child: Scaffold(
         body: LayoutBuilder(
@@ -64,26 +63,39 @@ class _ArtDetailWidgetState extends State<ArtDetailWidget> {
             return MediaQuery.removePadding(
               removeTop: true,
               context: context,
-              child: ListView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 //physics: NeverScrollableScrollPhysics(),
                 children: [
-                  widget.data.videoURL != 'empty' ? videoPlayer : Container(),
-                  widget.data.videoURL != 'empty' &&
-                          widget.data.imgURL !=
-                              'https://via.placeholder.com/350'
-                      ? SizedBox(height: 30)
-                      : Container(),
-                  widget.data.imgURL == 'https://via.placeholder.com/350'
-                      ? Container()
-                      : Container(
-                          height: 250,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              fit: BoxFit.fill,
-                              image: NetworkImage(widget.data.imgURL),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            scrollDirection: Axis.horizontal,
+                            itemCount: widget.data.imgURL.length,
+                            itemBuilder: (BuildContext context, int index) =>
+                                Container(
+                              height: 175,
+                              width: 175,
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  fit: BoxFit.fill,
+                                  image:
+                                      NetworkImage(widget.data.imgURL[index]),
+                                ),
+                              ),
                             ),
                           ),
                         ),
+                      ],
+                    ),
+                  ),
+                  widget.data.videoURL != 'empty' ? videoPlayer : Container(),
+                  widget.data.videoURL != 'empty'
+                      ? SizedBox(height: 30)
+                      : Container(),
                   SizedBox(
                     height: 15.0,
                   ),

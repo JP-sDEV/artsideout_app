@@ -1,3 +1,5 @@
+import 'package:artsideout_app/components/search/SearchBarFilter.dart';
+import 'package:artsideout_app/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -14,6 +16,8 @@ import 'package:artsideout_app/components/art/ArtDetailWidget.dart';
 import 'package:artsideout_app/pages/art/ArtDetailPage.dart';
 import 'package:artsideout_app/pages/activity/MasterActivityPage.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
+// Search
+import 'package:artsideout_app/components/search/FetchSearchQueries.dart';
 
 class MasterArtPage extends StatefulWidget {
   @override
@@ -26,9 +30,21 @@ class _MasterArtPageState extends State<MasterArtPage> {
   int numCards = 2;
   var isLargeScreen = false;
   var isMediumScreen = false;
+  bool isLoading = false;
+  bool noResults = false;
+  String queryResult = "";
+  Map<String, bool> optionsMap = {
+    "Sculpture": true,
+    "DigitalMedia": true,
+    "MixMedia": true,
+    "DrawingsAndPaintings": true,
+    "Other": true,
+  };
 
-  List<Installation> listInstallation = List<Installation>();
+  List<Installation> listResults = List<Installation>();
   GraphQLConfiguration graphQLConfiguration = GraphQLConfiguration();
+  TextEditingController searchQueryController = TextEditingController();
+  FetchResults fetchResults = new FetchResults();
 
   @override
   void initState() {
@@ -36,8 +52,29 @@ class _MasterArtPageState extends State<MasterArtPage> {
     _fillList();
   }
 
+  void handleTextChange() async {
+    String inputText = searchQueryController.text;
+
+    if (inputText != ' ' && inputText != '') {
+      setState(() {
+        isLoading = true;
+      });
+
+      listResults =
+          await fetchResults.getInstallationsByTypes(inputText, optionsMap);
+
+      setState(() {
+        isLoading = false;
+        queryResult = inputText;
+        noResults = fetchResults.checkNoResults(listResults);
+      });
+    }
+  }
+
   // Installation GraphQL Query
   void _fillList() async {
+    searchQueryController.clear();
+
     InstallationQueries queryInstallation = InstallationQueries();
     GraphQLClient _client = graphQLConfiguration.clientToQuery();
     QueryResult result = await _client.query(
@@ -48,14 +85,22 @@ class _MasterArtPageState extends State<MasterArtPage> {
     if (!result.hasException) {
       for (var i = 0; i < result.data["installations"].length; i++) {
         setState(() {
-          listInstallation.add(
+          List<String> imgsURL = [];
+
+          if (result.data["installations"][i]["images"] != null) {
+            for (int j = 0;
+                j < result.data["installations"][i]["images"].length;
+                j++) {
+              imgsURL.add(result.data["installations"][i]["images"][j]["url"]);
+            }
+          }
+
+          listResults.add(
             Installation(
               result.data["installations"][i]["title"],
               result.data["installations"][i]["desc"],
               zone: result.data["installations"][i]["zone"],
-              imgURL: result.data["installations"][i]["image"] == null
-                  ? 'https://via.placeholder.com/350'
-                  : result.data["installations"][i]["image"]["url"],
+              imgURL: imgsURL,
               videoURL: result.data["installations"][i]["videoUrl"] == null
                   ? 'empty'
                   : result.data["installations"][i]["videoUrl"],
@@ -155,159 +200,178 @@ class _MasterArtPageState extends State<MasterArtPage> {
                           fit: BoxFit.fitHeight,
                         ),
                       ),
-                      Row(
+                      Column(
                         children: [
-                          SizedBox(
-                            width: 20,
-                          ),
-                          (isLargeScreen)
-                              ? Expanded(
-                                  flex: 4,
-                                  child: Container(
-                                    width: 325,
-                                    color: Colors.transparent,
-                                    child: Container(
-                                      child: StaggeredGridView.countBuilder(
-                                        padding: EdgeInsets.zero,
-                                        crossAxisCount: 1,
-                                        itemCount: listActions.length,
-                                        itemBuilder: (BuildContext context,
-                                                int index) =>
-                                            Padding(
-                                                padding:
-                                                    const EdgeInsets.fromLTRB(
-                                                        10, 0, 10, 0),
-                                                child: GestureDetector(
-                                                    onTap: () {
-                                                      setState(() {
-//                                                        Navigator.push(context,
-//                                                            CupertinoPageRoute(
-//                                                          builder: (context) {
-//                                                            return listActions[
-//                                                                    index]
-//                                                                .page;
-//                                                          },
-//                                                        ));
-//                                                        onTabTapped(index);
-                                                      });
-                                                    },
-                                                    child: ClipRRect(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(20.0),
-                                                        child: Container(
-                                                          color:
-                                                              listActions[index]
-                                                                  .color,
-                                                          child: Stack(
-                                                            children: <Widget>[
-                                                              Positioned(
-                                                                top: -20,
-                                                                left: 10,
-                                                                child:
-                                                                    PlatformSvg
-                                                                        .asset(
-                                                                  listActions[
-                                                                          index]
-                                                                      .imgUrl,
-                                                                  width: listActions[
-                                                                          index]
-                                                                      .imgWidth,
-                                                                  fit: BoxFit
-                                                                      .fitWidth,
-                                                                  alignment:
-                                                                      Alignment
-                                                                          .topCenter,
-                                                                ),
-                                                              ),
-                                                              Align(
-                                                                alignment:
-                                                                    Alignment(
-                                                                        -0.8,
-                                                                        0.8),
-                                                                child: Text(
-                                                                    listActions[
-                                                                            index]
-                                                                        .title,
-                                                                    style: Theme.of(
-                                                                            context)
-                                                                        .textTheme
-                                                                        .headline5
-                                                                        .copyWith(
-                                                                            fontWeight:
-                                                                                FontWeight.bold,
-                                                                            color: Colors.white)),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        )))),
-                                        staggeredTileBuilder: (int index) =>
-                                            new StaggeredTile.count(
-                                          1,
-                                          0.57,
-                                        ),
-                                        mainAxisSpacing: 15.0,
-                                        crossAxisSpacing: 5.0,
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              : Container(),
-                          SizedBox(
-                            width: 20,
-                          ),
-                          Expanded(
-                            flex: 7,
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(left: 20.0, right: 20.0),
                             child: Container(
-                              width: 500,
-                              color: Colors.transparent,
-                              child: GridView.builder(
-                                padding: EdgeInsets.zero,
-                                gridDelegate:
-                                    SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: numCards,
-                                  crossAxisSpacing: 5.0,
-                                  mainAxisSpacing: 5.0,
-                                ),
-                                // Let the ListView know how many items it needs to build.
-                                itemCount: listInstallation.length,
-                                // Provide a builder function. This is where the magic happens.
-                                // Convert each item into a widget based on the type of item it is.
-                                itemBuilder: (context, index) {
-                                  final item = listInstallation[index];
-                                  return Center(
-                                    child: GestureDetector(
-                                      child: ArtListCard(
-                                        title: item.title,
-                                        artist: item.zone,
-                                        image: item.videoURL == 'empty'
-                                            ? item.imgURL
-                                            : getThumbnail(item.videoURL),
-                                      ),
-                                      onTap: () {
-                                        if (isLargeScreen) {
-                                          setState(() {
-                                            selectedValue = index;
-                                          });
-                                        } else {
-                                          Navigator.push(
-                                            context,
-                                            CupertinoPageRoute(
-                                              builder: (context) {
-                                                return ArtDetailPage(item);
-                                              },
-                                            ),
-                                          );
-                                        }
-                                      },
-                                    ),
-                                  );
-                                },
+                              height: 85,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SearchBarFilter(
+                                      handleTextChange,
+                                      _fillList,
+                                      isLoading,
+                                      optionsMap,
+                                      searchQueryController),
+                                  SizedBox(
+                                    height: 20,
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                          SizedBox(
-                            width: 20,
+                          Expanded(
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  width: 20,
+                                ),
+                                (isLargeScreen)
+                                    ? Expanded(
+                                        flex: 4,
+                                        child: Container(
+                                          width: 325,
+                                          color: Colors.transparent,
+                                          child: Container(
+                                            child:
+                                                StaggeredGridView.countBuilder(
+                                              padding: EdgeInsets.zero,
+                                              crossAxisCount: 1,
+                                              itemCount: listActions.length,
+                                              itemBuilder: (BuildContext
+                                                          context,
+                                                      int index) =>
+                                                  Padding(
+                                                      padding: const EdgeInsets
+                                                              .fromLTRB(
+                                                          10, 0, 10, 0),
+                                                      child: GestureDetector(
+                                                          onTap: () {
+                                                            setState(() {});
+                                                          },
+                                                          child: ClipRRect(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          20.0),
+                                                              child: Container(
+                                                                color:
+                                                                    listActions[
+                                                                            index]
+                                                                        .color,
+                                                                child: Stack(
+                                                                  children: <
+                                                                      Widget>[
+                                                                    Positioned(
+                                                                      top: -20,
+                                                                      left: 10,
+                                                                      child: PlatformSvg
+                                                                          .asset(
+                                                                        listActions[index]
+                                                                            .imgUrl,
+                                                                        width: listActions[index]
+                                                                            .imgWidth,
+                                                                        fit: BoxFit
+                                                                            .fitWidth,
+                                                                        alignment:
+                                                                            Alignment.topCenter,
+                                                                      ),
+                                                                    ),
+                                                                    Align(
+                                                                      alignment:
+                                                                          Alignment(
+                                                                              -0.8,
+                                                                              0.8),
+                                                                      child: Text(
+                                                                          listActions[index]
+                                                                              .title,
+                                                                          style: Theme.of(context)
+                                                                              .textTheme
+                                                                              .headline5
+                                                                              .copyWith(fontWeight: FontWeight.bold, color: Colors.white)),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              )))),
+                                              staggeredTileBuilder:
+                                                  (int index) =>
+                                                      new StaggeredTile.count(
+                                                1,
+                                                0.57,
+                                              ),
+                                              mainAxisSpacing: 15.0,
+                                              crossAxisSpacing: 5.0,
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    : Container(),
+                                SizedBox(
+                                  width: 20,
+                                ),
+                                Expanded(
+                                  flex: 7,
+                                  child: Container(
+                                    width: 500,
+                                    color: Colors.transparent,
+                                    child: GridView.builder(
+                                      padding: EdgeInsets.zero,
+                                      gridDelegate:
+                                          SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: numCards,
+                                        crossAxisSpacing: 5.0,
+                                        mainAxisSpacing: 5.0,
+                                      ),
+                                      itemCount: listResults.length,
+                                      itemBuilder: (context, index) {
+                                        final item = listResults[index];
+                                        return Center(
+                                          child: GestureDetector(
+                                            child: ArtListCard(
+                                              title: item.title,
+                                              artist: item.zone,
+                                              image: item.videoURL == 'empty'
+                                                  ? item.imgURL.length == 0
+                                                      ? [
+                                                          'https://via.placeholder.com/350'
+                                                        ]
+                                                      : item.imgURL
+                                                  : [
+                                                      getThumbnail(
+                                                          item.videoURL)
+                                                    ],
+                                            ),
+                                            onTap: () {
+                                              if (isLargeScreen) {
+                                                setState(() {
+                                                  selectedValue = index;
+                                                });
+                                              } else {
+                                                Navigator.push(
+                                                  context,
+                                                  CupertinoPageRoute(
+                                                    builder: (context) {
+                                                      return ArtDetailPage(
+                                                          item);
+                                                    },
+                                                  ),
+                                                );
+                                              }
+                                            },
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 20,
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -318,12 +382,11 @@ class _MasterArtPageState extends State<MasterArtPage> {
             ),
 
             // If large screen, render installation detail page
-            ((isLargeScreen || isMediumScreen) && listInstallation.length != 0)
+            ((isLargeScreen || isMediumScreen) && listResults.length != 0)
                 ? Expanded(
                     flex: 3,
                     key: UniqueKey(),
-                    child:
-                        ArtDetailWidget(data: listInstallation[selectedValue]))
+                    child: ArtDetailWidget(data: listResults[selectedValue]))
                 : Container(),
           ],
         );

@@ -1,4 +1,5 @@
 // Misc
+import 'package:artsideout_app/components/search/SearchBarFilter.dart';
 import 'package:artsideout_app/pages/art/ArtDetailPage.dart';
 import 'package:artsideout_app/theme.dart';
 import 'package:flutter/material.dart';
@@ -56,62 +57,25 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
   };
 
   TextEditingController _searchQueryController = TextEditingController();
-
-  List<Installation> listInstallations = List<Installation>();
-  List<Activity> listActivities = List<Activity>();
-  List<Profile> listProfiles = List<Profile>();
   List<dynamic> listResults = List<dynamic>();
-
   FetchResults fetchResults = new FetchResults();
 
-  void handleTextChange() {
+  void handleTextChange() async {
     String inputText = _searchQueryController.text;
 
     if (inputText != ' ' && inputText != '') {
-      if (listResults != null) clearResults();
-
       setState(() {
         isLoading = true;
         selectedItem = null;
         queryResult = inputText;
       });
 
-      getResults(inputText);
+      listResults = await fetchResults.getResults(inputText, optionsMap);
+      setState(() {
+        isLoading = false;
+        noResults = listResults.isEmpty;
+      });
     }
-  }
-
-  void getResults(String inputText) async {
-    listInstallations =
-        await fetchResults.getInstallationsByTypes(inputText, optionsMap);
-
-    listActivities =
-        await fetchResults.getActivitiesByTypes(inputText, optionsMap);
-
-    listProfiles = await fetchResults.getProfilesByTypes(inputText, optionsMap);
-
-    setState(() {
-      listResults = [...listInstallations, ...listActivities, ...listProfiles];
-      checkNoResults();
-    });
-  }
-
-  void clearResults() {
-    listInstallations.clear();
-    listActivities.clear();
-    listProfiles.clear();
-    listResults.clear();
-  }
-
-  void checkNoResults() {
-    setState(() {
-      isLoading = false;
-      if (listResults.isEmpty) {
-        noResults = true;
-        selectedItem = null;
-      } else {
-        noResults = false;
-      }
-    });
   }
 
   String getThumbnail(String videoURL) {
@@ -129,14 +93,15 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
               title: item.title,
               artist: item.zone,
               image: item.videoURL == 'empty'
-                  ? item.imgURL
-                  : getThumbnail(item.videoURL),
+                  ? item.imgURL.length == 0
+                      ? ['https://via.placeholder.com/350']
+                      : item.imgURL
+                  : [getThumbnail(item.videoURL)],
             ),
             onTap: () {
               setState(() {
                 if (isLargeScreen || isMediumScreen) {
-                  selectedItem =
-                      ArtDetailWidget(data: listInstallations[index]);
+                  selectedItem = ArtDetailWidget(data: item);
                 } else {
                   Navigator.push(
                     context,
@@ -239,61 +204,11 @@ class _MasterSearchPageState extends State<MasterSearchPage> {
             SizedBox(
               height: 20,
             ),
-            Row(
-              children: [
-                Expanded(
-                  flex: 10,
-                  child: TextField(
-                    controller: _searchQueryController,
-                    autofocus: true,
-                    decoration: InputDecoration(
-                      prefixIcon: IconButton(
-                        icon: Icon(Icons.search),
-                        color: asoPrimary,
-                        onPressed: handleTextChange,
-                      ),
-                      suffix: SizedBox(
-                        height: 26,
-                        width: 26,
-                        child: isLoading
-                            ? CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation(asoPrimary),
-                                backgroundColor: Colors.white,
-                              )
-                            : GestureDetector(
-                                child: Icon(
-                                  Icons.close,
-                                  size: 26,
-                                ),
-                                onTap: () => _searchQueryController.clear(),
-                              ),
-                      ),
-                      hintText: "Search installations, activities, artists...",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      hintStyle: TextStyle(color: Colors.black),
-                    ),
-                    style: TextStyle(color: Colors.black, fontSize: 22.0),
-                    onEditingComplete: handleTextChange,
-                  ),
-                ),
-                SizedBox(
-                  width: 5,
-                ),
-                Container(
-                  width: 130,
-                  child: FilterDropdown(
-                    onFilterChange: (String value) {
-                      setState(() {
-                        optionsMap[value] = !optionsMap[value];
-                      });
-                    },
-                    optionsMap: optionsMap,
-                  ),
-                )
-              ],
-            ),
+            SearchBarFilter(handleTextChange, () {
+              setState(() {
+                _searchQueryController.clear();
+              });
+            }, isLoading, optionsMap, _searchQueryController),
             SizedBox(
               height: 20,
             ),

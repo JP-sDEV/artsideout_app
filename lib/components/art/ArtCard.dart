@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class ArtListCard extends StatelessWidget {
   final String title;
   final String artist;
-  final String image;
+  final List<String> image;
   final Widget pageButton;
 
   const ArtListCard({
@@ -33,7 +33,7 @@ class ArtListCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     fit: BoxFit.fill,
-                    image: NetworkImage(image),
+                    image: NetworkImage(image[0]),
                   ),
                 ),
               ),

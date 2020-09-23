@@ -4,7 +4,7 @@ class Installation {
   String title;
   String desc;
   String zone;
-  String imgURL;
+  List<String> imgURL;
   String videoURL;
   Map<String, double> location;
   String locationRoom;
@@ -26,8 +26,12 @@ class InstallationQueries {
         title
         desc
         zone
+        mediumType
         videoUrl
         image {
+          url
+        }
+        images {
           url
         }
         location {
@@ -51,7 +55,11 @@ class InstallationQueries {
         title
         desc
         zone
+        mediumType
         image {
+          url
+        }
+        images {
           url
         }
         location {
@@ -80,6 +88,9 @@ class InstallationQueries {
         zone
         videoUrl
         image {
+          url
+        }
+        images {
           url
         }
         location {

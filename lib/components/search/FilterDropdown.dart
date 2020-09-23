@@ -35,34 +35,36 @@ class _FilterDropdownState extends State<FilterDropdown> {
         border: Border.all(
             style: BorderStyle.solid, color: Color(0xFF6868F6), width: 2.0),
       ),
-      child: DropdownButton(
-        isExpanded: true,
-        dropdownColor: Color(0xFFF9EBEB),
-        iconSize: 24,
-        elevation: 16,
-        hint: Text('Filter:'),
-        onChanged: (test) {},
-        items: widget.optionsMap.entries.map((e) {
-          return DropdownMenuItem(
-            child: Container(
-              child: Row(
-                children: [
-                  StatefulBuilder(
-                    builder: (context, _setState) => Checkbox(
-                      onChanged: (bool value) {
-                        _setState(() {
-                          widget.onFilterChange(e.key);
-                        });
-                      },
-                      value: widget.optionsMap[e.key],
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton(
+          isExpanded: true,
+          dropdownColor: Color(0xFFF9EBEB),
+          iconSize: 24,
+          elevation: 16,
+          hint: Text('Filter:'),
+          onChanged: (test) {},
+          items: widget.optionsMap.entries.map((e) {
+            return DropdownMenuItem(
+              child: Container(
+                child: Row(
+                  children: [
+                    StatefulBuilder(
+                      builder: (context, _setState) => Checkbox(
+                        onChanged: (bool value) {
+                          _setState(() {
+                            widget.onFilterChange(e.key);
+                          });
+                        },
+                        value: widget.optionsMap[e.key],
+                      ),
                     ),
-                  ),
-                  optionTextLabel(e.key),
-                ],
+                    optionTextLabel(e.key),
+                  ],
+                ),
               ),
-            ),
-          );
-        }).toList(),
+            );
+          }).toList(),
+        ),
       ),
     );
   }
