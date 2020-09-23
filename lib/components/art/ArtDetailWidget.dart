@@ -60,6 +60,7 @@ class _ArtDetailWidgetState extends State<ArtDetailWidget> {
       child: Scaffold(
         body: LayoutBuilder(
           builder: (context, constraints) {
+            var width = MediaQuery.of(context).size.width;
             return MediaQuery.removePadding(
               removeTop: true,
               context: context,
@@ -67,34 +68,32 @@ class _ArtDetailWidgetState extends State<ArtDetailWidget> {
                 mainAxisSize: MainAxisSize.min,
                 //physics: NeverScrollableScrollPhysics(),
                 children: [
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            scrollDirection: Axis.horizontal,
-                            itemCount: widget.data.imgURL.length,
-                            itemBuilder: (BuildContext context, int index) =>
-                                Container(
-                              height: 175,
-                              width: 175,
-                              decoration: BoxDecoration(
-                                image: DecorationImage(
-                                  fit: BoxFit.fill,
-                                  image:
-                                      NetworkImage(widget.data.imgURL[index]),
-                                ),
+                  SizedBox(
+                    // Horizontal ListView
+                    height: 250,
+                    width: width,
+                    child: ListView.builder(
+                      itemCount: widget.data.imgURL.length,
+                      scrollDirection: Axis.horizontal,
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) {
+                        return Container(
+                            width: (width / (widget.data.imgURL.length + 1)),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                fit: BoxFit.fill,
+                                image: NetworkImage(widget.data.imgURL[index]),
                               ),
-                            ),
-                          ),
-                        ),
-                      ],
+                            ));
+                      },
                     ),
                   ),
-                  widget.data.videoURL != 'empty' ? videoPlayer : Container(),
                   widget.data.videoURL != 'empty'
-                      ? SizedBox(height: 30)
+                      ? Container(
+                          width: (width / widget.data.imgURL.length),
+                          height: 250,
+                          child: videoPlayer)
                       : Container(),
                   SizedBox(
                     height: 15.0,
