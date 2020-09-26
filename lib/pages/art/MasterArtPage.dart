@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 // GraphQL
-import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:artsideout_app/graphql/config.dart';
 import 'package:artsideout_app/graphql/Installation.dart';
 // Common
@@ -63,56 +62,19 @@ class _MasterArtPageState extends State<MasterArtPage> {
     }
   }
 
+  void handleFilterChange(String value) {
+    setState(() {
+      optionsMap[value] = !optionsMap[value];
+      _fillList();
+    });
+  }
+
   // Installation GraphQL Query
   void _fillList() async {
+    listResults = await fetchResults.getInstallationsByTypes("", optionsMap);
     setState(() {
       noResults = false;
     });
-
-    InstallationQueries queryInstallation = InstallationQueries();
-    GraphQLClient _client = graphQLConfiguration.clientToQuery();
-    QueryResult result = await _client.query(
-      QueryOptions(
-        documentNode: gql(queryInstallation.getAll),
-      ),
-    );
-    if (!result.hasException) {
-      for (var i = 0; i < result.data["installations"].length; i++) {
-        setState(() {
-          List<String> imgsURL = [];
-
-          if (result.data["installations"][i]["images"] != null) {
-            for (int j = 0;
-                j < result.data["installations"][i]["images"].length;
-                j++) {
-              imgsURL.add(result.data["installations"][i]["images"][j]["url"]);
-            }
-          }
-
-          listResults.add(
-            Installation(
-              result.data["installations"][i]["title"],
-              result.data["installations"][i]["desc"],
-              zone: result.data["installations"][i]["zone"],
-              imgURL: imgsURL,
-              videoURL: result.data["installations"][i]["videoUrl"] == null
-                  ? 'empty'
-                  : result.data["installations"][i]["videoUrl"],
-              location: {
-                'latitude': result.data["installations"][i]["location"] == null
-                    ? 0.0
-                    : result.data["installations"][i]["location"]["latitude"],
-                'longitude': result.data["installations"][i]["location"] == null
-                    ? 0.0
-                    : result.data["installations"][i]["location"]["longitude"],
-              },
-              locationRoom: result.data["installations"][i]["locationroom"],
-              profiles: [],
-            ),
-          );
-        });
-      }
-    }
   }
 
   final List<ListActions> listActions = [
@@ -126,6 +88,7 @@ class _MasterArtPageState extends State<MasterArtPage> {
 
   @override
   Widget build(BuildContext context) {
+    print(optionsMap);
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -207,6 +170,7 @@ class _MasterArtPageState extends State<MasterArtPage> {
                                   SearchBarFilter(
                                     handleTextChange: handleTextChange,
                                     handleTextClear: _fillList,
+                                    handleFilterChange: handleFilterChange,
                                     optionsMap: optionsMap,
                                   ),
                                   SizedBox(
@@ -311,6 +275,8 @@ class _MasterArtPageState extends State<MasterArtPage> {
                                     width: 500,
                                     color: Colors.transparent,
                                     child: GridView.builder(
+                                      physics:
+                                          const AlwaysScrollableScrollPhysics(),
                                       padding: EdgeInsets.zero,
                                       gridDelegate:
                                           SliverGridDelegateWithFixedCrossAxisCount(
