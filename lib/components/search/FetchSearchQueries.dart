@@ -62,8 +62,10 @@ class FetchResults {
             Installation(
               installationsResult.data["installations"][i]["title"],
               installationsResult.data["installations"][i]["desc"],
-              zone: installationsResult.data["installations"][i]["zone"],
-              imgURL: ['https://via.placeholder.com/350'],
+              zone: installationsResult.data["installations"][i]["zone"] == null
+                  ? 'place'
+                  : installationsResult.data["installations"][i]["zone"],
+              imgURL: imgsURL,
               videoURL: installationsResult.data["installations"][i]
                           ["videoUrl"] ==
                       null

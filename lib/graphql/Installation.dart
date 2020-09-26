@@ -28,9 +28,6 @@ class InstallationQueries {
         zone
         mediumType
         videoUrl
-        image {
-          url
-        }
         images {
           url
         }

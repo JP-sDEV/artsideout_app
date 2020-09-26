@@ -5,10 +5,14 @@ import 'package:artsideout_app/components/search/FilterDropdown.dart';
 class SearchBarFilter extends StatefulWidget {
   final void Function(String text) handleTextChange;
   final void Function() handleTextClear;
+  final void Function(String value) handleFilterChange;
   final Map<String, bool> optionsMap;
 
   SearchBarFilter(
-      {this.handleTextChange, this.handleTextClear, this.optionsMap});
+      {this.handleTextChange,
+      this.handleTextClear,
+      this.handleFilterChange,
+      this.optionsMap});
 
   _SearchBarFilterState createState() => _SearchBarFilterState();
 }
@@ -74,7 +78,8 @@ class _SearchBarFilterState extends State<SearchBarFilter> {
           child: FilterDropdown(
             onFilterChange: (String value) {
               setState(() {
-                widget.optionsMap[value] = !widget.optionsMap[value];
+                widget.handleFilterChange(value);
+                //widget.optionsMap[value] = !widget.optionsMap[value];
               });
             },
             optionsMap: widget.optionsMap,
